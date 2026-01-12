@@ -1,0 +1,66 @@
+{
+	"name": "zed-style",
+	"version": "1.1.0",
+	"description": "Lightweight runtime CSS-in-JS engine with nested pseudo selectors, media queries, global styles, keyframes, and font-face support.",
+	"author": {
+		"name": "kingslimes",
+		"email": "natontmp123@gmail.com",
+		"url": "https://github.com/kingslimes"
+	},
+	"license": "MIT",
+	"private": false,
+	"sideEffects": false,
+	"type": "module",
+	"files": [
+		"dist",
+		"LICENSE",
+		"README.md"
+	],
+	"main": "./dist/index.jsx",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/index.jsx",
+			"types": "./dist/index.d.ts"
+		}
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/kingslimes/zed-style.git"
+	},
+	"bugs": {
+		"url": "https://github.com/kingslimes/zed-style/issues"
+	},
+	"homepage": "https://github.com/kingslimes/zed-style#readme",
+	"keywords": [
+		"css",
+		"css-in-js",
+		"runtime-css",
+		"styled",
+		"style-engine",
+		"atomic-css",
+		"postcss",
+		"autoprefixer",
+		"nextjs",
+		"react",
+		"bun",
+		"typescript",
+		"design-system",
+		"theming",
+		"media-queries",
+		"keyframes",
+		"font-face"
+	],
+	"peerDependencies": {
+        "react": ">=18",
+		"postcss": "^8",
+		"autoprefixer": "^10"
+	},
+	"devDependencies": {
+        "csstype": "^3"
+	},
+	"engines": {
+		"bun": ">=1.0.0",
+		"node": ">=18"
+	}
+}

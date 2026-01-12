@@ -1,0 +1,26 @@
+{
+  "name": "zed-style",
+  "module": "src/index.tsx",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/babel__core": "^7.20.5",
+    "@types/bun": "latest",
+    "@types/react": "^19.2.8",
+    "csstype": "^3.2.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "scripts": {
+    "build:jsx": "bun run build.ts",
+    "build:type": "tsc -p tsconfig.types.json",
+    "export": "bun run build:jsx && bun run build:type"
+  },
+  "dependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
+    "autoprefixer": "^10.4.23",
+    "postcss": "^8.5.6"
+  }
+}
