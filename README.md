@@ -75,14 +75,15 @@ npm install react postcss autoprefixer
 
 ## Basic Usage (Page Scoped)
 
-Create a `NextStyle` instance **inside the page or component**.
+Create a `NextStyle` instance **inside the page or component**.  
+You may optionally provide a **custom prefix** to control generated class names.
 
 ```ts
 import { NextStyle } from "next-style"
 
 export default function Page() {
-    const style = new NextStyle()
-    const btn = style.css({
+    const style = new NextStyle("home")
+    const button = style.css({
         padding: "8px 16px",
         backgroundColor: "black",
         color: "white",
@@ -91,18 +92,24 @@ export default function Page() {
     return (
         <>
             <style.StyleProvider />
-            <button className={ btn }>Click me</button>
+            <button className={ button }>Click me</button>
         </>
     )
 }
 ```
 
-Important rules:
-- Do NOT create `NextStyle` in a shared module
-- Do NOT reuse the same instance across pages
-- Always render `StyleProvider` in the same scope
+Generated class names will look like:
 
----
+```txt
+home_ab12cd3
+```
+
+Notes:
+- The prefix is optional
+- If omitted, the default prefix is used
+- Prefixes help identify styles per page or component
+- Each page or component should create its own `NextStyle` instance
+
 
 ## Why StyleProvider Is Required Per Page
 
