@@ -13,6 +13,7 @@ await build({
     },
     splitting: false,
     external: [
+        "react",
         "csstype",
         "postcss",
         "autoprefixer"

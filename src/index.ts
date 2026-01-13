@@ -1,6 +1,8 @@
 import postcss from "postcss"
+import { createElement } from "react"
 import autoprefixer from "autoprefixer"
 import type { Properties } from "csstype"
+import type { DetailedReactHTMLElement } from "react"
 
 export type NextStyleProperties = {
     [ K in keyof Properties< string | number > ]?: Properties< string | number >[K]
@@ -206,12 +208,23 @@ export class NextStyle {
         }
     }
 
-    get StyleText() {
+    toTextCss = () => {
         if ( this.rules.size === 0 ) return null
         let cssText = ""
         for ( const rule of this.rules.values() ) {
             cssText += rule + "\n"
         }
         return cssText
+    }
+
+    StyleProvider = (): DetailedReactHTMLElement<{
+            children: string;
+        }, HTMLStyleElement> | null => {
+        if ( this.rules.size === 0 ) return null
+        let cssText = ""
+        for ( const rule of this.rules.values() ) {
+            cssText += rule + "\n"
+        }
+        return createElement( "style", { children: cssText })
     }
 }

@@ -1,6 +1,6 @@
 {
 	"name": "next-style",
-	"version": "1.1.4",
+	"version": "1.1.5",
 	"description": "Lightweight runtime CSS-in-JS engine with nested pseudo selectors, media queries, global styles, keyframes, and font-face support.",
 	"author": {
 		"name": "kingslimes",
@@ -52,14 +52,12 @@
 		"font-face"
 	],
 	"peerDependencies": {
+		"react": ">=18",
 		"postcss": "^8",
 		"autoprefixer": "^10"
 	},
 	"devDependencies": {
         "csstype": "latest"
-	},
-	"engines": {
-		"node": ">=18"
 	},
 	"publishConfig": {
 		"access": "public"

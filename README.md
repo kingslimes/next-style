@@ -1,300 +1,333 @@
-# next-style
+# NextStyle
 
-**next-style** is a lightweight runtime CSS-in-JS engine designed for React, Next.js, and Bun.
+A lightweight **runtime CSS-in-JS engine** for React with deterministic class names, nested pseudo selectors, media queries, global styles, keyframes, and font-face support.
 
-It is intentionally designed to be **page-scoped and component-scoped**, ensuring predictable
-style isolation with zero global leakage between pages or routes.
-
-The library is framework-agnostic at its core and does not depend on React internally.
-
----
-
-## Core Design Principles
-
-- Styles are scoped to a **single page or component**
-- No global singleton style registry
-- No cross-page or cross-route CSS leakage
-- Each page owns its own styles
-- Explicit style injection via a `<style>` tag
-- No implicit DOM side effects
-
-Because of this design:
-- `new NextStyle()` must be created inside the page or component scope
-- Styles must be injected manually using `ns.StyleText`
-
----
-
-## Features
-
-- Object-based styling with strong TypeScript support
-- Deterministic hashing (same styles always produce the same class name)
-- Nested pseudo selectors (`_hover`, `_focus`, `_active`)
-- Built-in responsive media queries
-- Page-scoped global styles
-- `@keyframes` support
-- `@font-face` support
-- PostCSS + Autoprefixer integration
-- Automatic rule deduplication (per instance)
-- Single `<style>` injection per page or component
-- No side effects (`sideEffects: false`)
-
----
-
-## Installation
-
-### npm
-
-```sh
-npm install next-style
-```
-
-### Bun
-
-```sh
-bun add next-style
-```
-
----
-
-## Peer Dependencies
-
-For most **Next.js applications**, you **do not need to install these manually**.
-
-- **React** is already included with Next.js
-- **PostCSS** and **Autoprefixer** are bundled and used internally by Next.js
-
-This section mainly applies if you are using **next-style outside of Next.js**, such as:
-- Custom React setups
-- Bun + React
-- Vite or other non-Next runtimes
-
-If required, install them manually:
-
-```sh
-npm install react postcss autoprefixer
-```
-
----
-
-## Basic Usage (Page Scoped)
-
-Create a `NextStyle` instance **inside the page or component**.  
-You may optionally provide a **custom prefix** to control generated class names.
-
-```ts
-import { NextStyle } from "next-style"
-
-export default function Page() {
-    const ns = new NextStyle("home")
-    const btn = ns.css({
-        padding: "8px 16px",
-        backgroundColor: "black",
-        color: "white",
-        borderRadius: "6px"
-    })
-    return (
-        <>
-            <style>{ ns.StyleText }</style>
-            <button className={ btn }>Click me</button>
-        </>
-    )
-}
-```
-
-Generated class names will look like:
-
-```txt
-home_ab12cd3
-```
-
-Notes:
-- The prefix is optional
-- If omitted, a default prefix is used
-- Prefixes help identify styles per page or component
-- Each page or component should create its own `NextStyle` instance
-
----
-
-## Pseudo Selectors
-
-Pseudo selectors are defined using keys prefixed with `_`.
-
-```ts
-const card = ns.css({
-    backgroundColor: "#fff",
-    transition: "0.2s ease",
-    _hover: {
-        backgroundColor: "#f5f5f5"
-    },
-    _active: {
-        transform: "scale(0.98)"
-    }
-})
-```
-
-Supported pseudo selectors:
-- `_hover`
-- `_focus`
-- `_active`
-
----
-
-## Responsive Styles (Media Queries)
-
-Built-in breakpoints:
-
-- `_sm` → min-width: 640px
-- `_md` → min-width: 768px
-- `_lg` → min-width: 1024px
-- `_xl` → min-width: 1280px
-- `_xxl` → min-width: 1536px
-
-```ts
-const box = ns.css({
-    width: 100,
-    _md: {
-        width: 200
-    },
-    _lg: {
-        width: 300
-    }
-})
-```
-
-Media queries can be nested and are automatically merged.
-
----
-
-## Global Styles (Page Scoped)
-
-Global styles are scoped to the current page or component instance.
-
-```ts
-ns.global("body", {
-    margin: 0,
-    fontFamily: "Inter, sans-serif"
-})
-```
-
-These styles exist only for the lifetime of the page or component.
-
----
-
-## Keyframes
-
-Create animations using `keyframes()`:
-
-```ts
-const fadeIn = ns.keyframes({
-    from: { opacity: 0 },
-    to: { opacity: 1 }
-})
-```
-
-Use the animation in styles:
-
-```ts
-const modal = ns.css({
-    animation: `${ fadeIn } 0.3s ease-out`
-})
-```
-
-Keyframes are scoped to the current `NextStyle` instance.
-
----
-
-## Font Face
-
-Declare fonts using `fontFace()`:
-
-```ts
-ns.fontFace({
-    fontFamily: "Inter",
-    src: "url(/fonts/inter.woff2) format('woff2')",
-    fontWeight: 400,
-    fontStyle: "normal",
-    fontDisplay: "swap"
-})
-```
-
-Font-face rules are injected only for the current page or component.
-
----
-
-## Deterministic Hashing
-
-- Styles are hashed using a stable algorithm
-- Object keys are sorted before hashing
-- Semantically identical styles always produce the same class name
-- Prevents unnecessary class regeneration
-
----
-
-## Server-Side Rendering (SSR)
-
-`next-style` is SSR-safe.
-
-Because the core API only generates strings:
-- No JSX is exported from the library
-- No React runtime is required
-- No side effects occur during render
-
-You can safely inject styles during SSR:
-
-```tsx
-<style>{ ns.StyleText }</style>
-```
-
-The same output will be produced on both the server and the client.
-
----
-
-## Performance Characteristics
-
-- CSS rules are generated and deduplicated per instance
-- PostCSS and Autoprefixer results are cached
-- Only one `<style>` tag is required per page or component
-- No global runtime mutations
-
-Ideal for:
-- Next.js App Router
-- Page-level isolation
-- Component-driven design systems
-
----
-
-## Common Gotchas
-
-- Do not create a shared `NextStyle` instance across pages
-- Do not treat `next-style` as a global style manager
-- Always inject `ns.StyleText` before elements that use generated class names
-- Avoid calling `ns.css()` conditionally with different order between renders
+Designed for **page-scoped and component-scoped usage** without build-time tooling.
 
 ---
 
 ## Package Information
 
-- Name: `next-style`
-- Version: `1.1.2`
-- License: MIT
-- Module type: ESM
-- Side effects: false
-
-Repository:  
-https://github.com/kingslimes/next-style
-
-Issues:  
-https://github.com/kingslimes/next-style/issues
+- **Name:** next-style
+- **Version:** 1.1.5
+- **License:** MIT
+- **Author:** kingslimes  
+  https://github.com/kingslimes
+- **Repository:**  
+  https://github.com/kingslimes/next-style
+- **Issue Tracker:**  
+  https://github.com/kingslimes/next-style/issues
 
 ---
 
-## Roadmap
+## Features
 
-- `&` selector nesting
-- `_dark` / `_light` helpers
-- `@layer` support
-- Optional React helpers
-- Dev-time warnings for incorrect usage
+- Object-based styling (TypeScript friendly)
+- Deterministic class names (same style → same class)
+- Pseudo selectors (`:hover`, `:focus`, `:active`)
+- Responsive media queries (`sm` → `xxl`)
+- Global styles
+- `@keyframes` support
+- `@font-face` support
+- Built-in PostCSS + Autoprefixer
+- Zero DOM dependency
+- Tree-shakeable (`sideEffects: false`)
+- Copy–paste friendly API
+
+---
+
+## Installation
+
+''' bash
+npm install next-style
+# or
+bun add next-style
+'''
+
+---
+
+## Peer Dependencies
+
+NextStyle relies on the following peer dependencies:
+
+''' txt
+react >= 18
+postcss ^8
+autoprefixer ^10
+'''
+
+Make sure they are installed in your project.
+
+---
+
+## Recommended Usage Pattern (Scoped)
+
+The **recommended and official pattern** is to scope styles per page or per component using destructuring.
+
+''' ts
+const { css, StyleProvider } = new NextStyle("home")
+'''
+
+Why this works well:
+- Clear scope ownership
+- No global side effects
+- Easy to copy and reuse
+- Matches React’s mental model
+
+---
+
+## Basic Example (Page Scoped)
+
+''' tsx
+import { NextStyle } from "next-style"
+
+export default function HomePage() {
+    const { css, StyleProvider } = new NextStyle("home")
+
+    const title = css({
+        fontSize: "32px",
+        fontWeight: 700,
+        marginBottom: "16px"
+    })
+
+    const button = css({
+        padding: "10px 20px",
+        borderRadius: "8px",
+        backgroundColor: "#2563eb",
+        color: "#fff",
+
+        _hover: {
+            backgroundColor: "#1d4ed8"
+        }
+    })
+
+    return (
+        <>
+            <StyleProvider />
+            <h1 className={title}>Home</h1>
+            <button className={button}>Click me</button>
+        </>
+    )
+}
+'''
+
+---
+
+## Styling API
+
+### `css(style): string`
+
+Creates a class name from a style object.
+
+''' ts
+const className = css({
+    color: "red",
+    fontSize: "16px"
+})
+'''
+
+- Automatically converts camelCase → kebab-case
+- Deduplicates styles using hashing
+- Returns a stable class name
+
+---
+
+## Pseudo Selectors
+
+Supported pseudo keys:
+
+| Key | CSS Output |
+|----|-----------|
+| `_hover` | `:hover` |
+| `_focus` | `:focus` |
+| `_active` | `:active` |
+
+Example:
+
+''' ts
+css({
+    color: "black",
+    _hover: {
+        color: "red"
+    }
+})
+'''
+
+---
+
+## Responsive Media Queries
+
+Built-in breakpoints:
+
+| Key | Media Query |
+|----|-------------|
+| `_sm` | `(min-width: 640px)` |
+| `_md` | `(min-width: 768px)` |
+| `_lg` | `(min-width: 1024px)` |
+| `_xl` | `(min-width: 1280px)` |
+| `_xxl` | `(min-width: 1536px)` |
+
+Example:
+
+''' ts
+css({
+    fontSize: "14px",
+    _lg: {
+        fontSize: "18px"
+    }
+})
+'''
+
+Media queries can be nested and merged automatically.
+
+---
+
+## Global Styles
+
+### `global(selector, style)`
+
+Apply styles globally without generating a class.
+
+''' ts
+const { global, StyleProvider } = new NextStyle("global")
+
+global("body", {
+    margin: 0,
+    fontFamily: "system-ui"
+})
+
+global("a", {
+    color: "inherit",
+    _hover: {
+        textDecoration: "underline"
+    }
+})
+'''
+
+---
+
+## Animations
+
+### `keyframes(frames): string`
+
+Creates a `@keyframes` rule and returns its name.
+
+''' ts
+const fadeIn = keyframes({
+    from: { opacity: 0 },
+    to: { opacity: 1 }
+})
+
+css({
+    animation: `${fadeIn} 300ms ease-in`
+})
+'''
+
+---
+
+## Fonts
+
+### `fontFace(font)`
+
+Registers a `@font-face` rule.
+
+''' ts
+fontFace({
+    fontFamily: "MyFont",
+    src: "url(/fonts/myfont.woff2)",
+    fontWeight: 400,
+    fontStyle: "normal",
+    fontDisplay: "swap"
+})
+'''
+
+---
+
+## Rendering Styles
+
+### `<StyleProvider />`
+
+Injects all generated CSS into a `<style>` tag.
+
+''' tsx
+<>
+    <StyleProvider />
+    <App />
+</>
+'''
+
+- Returns `null` if no styles exist
+- Should be rendered **once per scope**
+
+---
+
+### `toTextCss(): string | null`
+
+Returns all generated CSS as a string.
+
+Useful for:
+- Server-side rendering (SSR)
+- Manual injection
+- Debugging
+
+''' ts
+const cssText = toTextCss()
+'''
+
+---
+
+## Component Scoped Example
+
+Reusable, self-contained component.
+
+''' tsx
+import { NextStyle } from "next-style"
+
+export function Card({ title, children }) {
+    const { css, StyleProvider } = new NextStyle("card")
+
+    const root = css({
+        padding: "16px",
+        borderRadius: "12px",
+        backgroundColor: "#fff",
+        boxShadow: "0 10px 25px rgba(0,0,0,.1)"
+    })
+
+    const heading = css({
+        fontSize: "18px",
+        fontWeight: 600,
+        marginBottom: "8px"
+    })
+
+    return (
+        <>
+            <StyleProvider />
+            <div className={root}>
+                <div className={heading}>{title}</div>
+                {children}
+            </div>
+        </>
+    )
+}
+'''
+
+---
+
+## Best Practices
+
+- Create **one NextStyle instance per page or component**
+- Do **not** share instances globally
+- Render `StyleProvider` only once per scope
+- Use meaningful prefixes (`home`, `card`, `profile`)
+
+---
+
+## Design Intentions
+
+- No descendant selectors (`& > div`)
+- No arbitrary selector nesting
+- Predictable output over expressiveness
+- Optimized for runtime and SSR safety
 
 ---
 
