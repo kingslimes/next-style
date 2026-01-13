@@ -20,8 +20,27 @@ type NextStyleObject = Omit<
     "_sm" | "_md" | "_lg" | "_xl" | "_xxl"
 >
 
+type KeyframesObject = {
+    [ step: string ]: Properties< string | number >
+}
+
+type FontFaceObject = {
+    fontFamily: string
+    src: string
+    fontWeight?: string | number
+    fontStyle?: string
+    fontDisplay?: string
+    unicodeRange?: string
+}
+
 const processor = postcss([
-    autoprefixer({ overrideBrowserslist: [ ">0.2%", "not dead", "not op_mini all" ] })
+    autoprefixer({
+        overrideBrowserslist: [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ]
+    })
 ])
 
 const postcssCache = new Map< string, string >()
@@ -32,6 +51,15 @@ function postcssTransform( cssText: string ): string {
     const result = processor.process( cssText, { from: undefined }).css
     postcssCache.set( cssText, result )
     return result
+}
+
+function stableStringify( value: any ): string {
+    if ( value == null || typeof value !== "object" ) return JSON.stringify( value )
+    if ( Array.isArray( value ) ) return `[${ value.map( stableStringify ).join(",") }]`
+    const keys = Object.keys( value ).sort()
+    return `{${ keys.map(
+        k => `"${ k }":${ stableStringify( value[k] ) }`
+    ).join(",") }}`
 }
 
 function createHashName( seed: string ) {
@@ -59,7 +87,16 @@ const MEDIA_MAP = {
 
 type MediaKey = keyof typeof MEDIA_MAP
 
-type SerializeContext = { selector: string, media?: string }
+type SerializeContext = {
+    selector: string
+    media?: string
+}
+
+function mergeMedia( parent?: string, current?: string ) {
+    if ( !parent ) return current
+    if ( !current ) return parent
+    return `${ parent } and ${ current }`
+}
 
 function serializeNested(
     style: NextStyleProperties,
@@ -70,18 +107,18 @@ function serializeNested(
     for ( const key in style ) {
         const value = style[ key as keyof NextStyleProperties ]
         if ( value == null || typeof value === "object" || key.startsWith("_") ) continue
-        base += `${ toKebabCase(key) }:${ value };`
+        base += `${ toKebabCase( key ) }:${ value };`
     }
     if ( base ) {
         const rule = `${ ctx.selector }{${ base }}`
-        css += ctx.media ? `${ ctx.media }{${ rule }}` : rule
+        css += ctx.media ? `@media ${ ctx.media }{${ rule }}` : rule
     }
     for ( const pseudo of [ "_hover", "_focus", "_active" ] as const ) {
         const value = style[ pseudo ]
         if ( !value ) continue
         css += serializeNested( value, {
-            ...ctx,
-            selector: `${ ctx.selector }:${ pseudo.slice(1) }`
+            selector: `${ ctx.selector }:${ pseudo.slice(1) }`,
+            media: ctx.media
         })
     }
     for ( const key in MEDIA_MAP ) {
@@ -89,29 +126,87 @@ function serializeNested(
         const value = style[ mediaKey ]
         if ( !value ) continue
         css += serializeNested( value, {
-            ...ctx,
-            media: `@media ${ MEDIA_MAP[mediaKey] }`
+            selector: ctx.selector,
+            media: mergeMedia( ctx.media, MEDIA_MAP[ mediaKey ] )
         })
     }
     return css
 }
 
 export class NextStyle {
+
     private rules = new Map< string, string >()
-    constructor( private prefix = "next" ) {}
+
+    constructor(
+        private prefix = "next"
+    ) {}
+
     css = ( style: NextStyleProperties ): string => {
-        const hash = createHashName( JSON.stringify(style) )
+        const seed = stableStringify( style )
+        const hash = createHashName( seed )
         const className = `${ this.prefix }_${ hash }`
-        if ( !this.rules.has(className) ) {
+        const key = `class:${ className }`
+        if ( !this.rules.has( key ) ) {
             const raw = serializeNested( style, {
                 selector: `.${ className }`
             })
             const cssText = postcssTransform( raw )
-            this.rules.set( className, cssText )
+            this.rules.set( key, cssText )
         }
         return className
     }
-    Provider = () => {
+
+    global = ( selector: string, style: NextStyleProperties ) => {
+        const key = `global:${ selector }`
+        if ( !this.rules.has( key ) ) {
+            const raw = serializeNested( style, {
+                selector
+            })
+            const cssText = postcssTransform( raw )
+            this.rules.set( key, cssText )
+        }
+    }
+
+    keyframes = ( frames: KeyframesObject ): string => {
+        const seed = stableStringify( frames )
+        const hash = createHashName( seed )
+        const name = `${ this.prefix }_${ hash }`
+        const key = `@keyframes:${ name }`
+        if ( !this.rules.has( key ) ) {
+            let body = ""
+            for ( const step in frames ) {
+                let props = ""
+                const frame = frames[ step ]
+                for ( const prop in frame ) {
+                    props += `${ toKebabCase( prop ) }:${ frame[ prop as keyof typeof frame ] };`
+                }
+                body += `${ step }{${ props }}`
+            }
+            const cssText = postcssTransform(
+                `@keyframes ${ name }{${ body }}`
+            )
+            this.rules.set( key, cssText )
+        }
+        return name
+    }
+
+    fontFace = ( font: FontFaceObject ) => {
+        const seed = stableStringify( font )
+        const hash = createHashName( seed )
+        const key = `@font-face:${ hash }`
+        if ( !this.rules.has( key ) ) {
+            let body = ""
+            for ( const prop in font ) {
+                body += `${ toKebabCase( prop ) }:${ (font as any)[ prop ] };`
+            }
+            const cssText = postcssTransform(
+                `@font-face{${ body }}`
+            )
+            this.rules.set( key, cssText )
+        }
+    }
+
+    StyleProvider = () => {
         if ( this.rules.size === 0 ) return null
         let cssText = ""
         for ( const rule of this.rules.values() ) {

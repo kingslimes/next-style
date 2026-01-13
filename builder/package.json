@@ -1,6 +1,6 @@
 {
 	"name": "next-style",
-	"version": "1.1.1",
+	"version": "1.1.2",
 	"description": "Lightweight runtime CSS-in-JS engine with nested pseudo selectors, media queries, global styles, keyframes, and font-face support.",
 	"author": {
 		"name": "kingslimes",
@@ -26,12 +26,12 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/kingslimes/zed-style.git"
+		"url": "https://github.com/kingslimes/next-style.git"
 	},
 	"bugs": {
-		"url": "https://github.com/kingslimes/zed-style/issues"
+		"url": "https://github.com/kingslimes/next-style/issues"
 	},
-	"homepage": "https://github.com/kingslimes/zed-style#readme",
+	"homepage": "https://github.com/kingslimes/next-style#readme",
 	"keywords": [
 		"css",
 		"css-in-js",
@@ -57,7 +57,7 @@
 		"autoprefixer": "^10"
 	},
 	"devDependencies": {
-        "csstype": "^3"
+        "csstype": "latest"
 	},
 	"engines": {
 		"bun": ">=1.0.0",

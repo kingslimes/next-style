@@ -17,6 +17,10 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+      - name: Remove lock file
+        run: rm -f ./bun.lock
+      - name: Setup file
+        run: cp ./README.md ./builder & cp ./LICENSE ./builder
       - name: Install dependencies
         run: bun install
       - name: Build project
