@@ -1,8 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "emitDeclarationOnly": true,
+    "noEmit": false,
     "declaration": true,
+    "emitDeclarationOnly": true,
     "outDir": "builder/dist",
     "moduleResolution": "bundler"
   },
