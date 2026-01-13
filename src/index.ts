@@ -173,7 +173,7 @@ class RelationBuilder {
 export class NextStyle {
     private rules = new Map< string, string >()
     constructor( private prefix = "next" ) {}
-    css( style: NextStyleProperties ): string {
+    css = ( style: NextStyleProperties ): string => {
         const seed = stableStringify( style )
         const hash = createHashName( seed )
         const className = `${ this.prefix }_${ hash }`
@@ -185,7 +185,7 @@ export class NextStyle {
         }
         return className
     }
-    global( selector: string, style: NextStyleProperties ): void {
+    global = ( selector: string, style: NextStyleProperties ): void => {
         const key = `global:${ selector }`
         if ( !this.rules.has( key ) ) {
             const raw = serializeNested( style, { selector } )
@@ -196,7 +196,7 @@ export class NextStyle {
     /**
      * Apply default global CSS reset
      */
-    globalReset(): void {
+    globalReset = (): void => {
         this.global( "html,body", {
             maxWidth: "100vw",
             overflowX: "hidden"
@@ -218,8 +218,10 @@ export class NextStyle {
             textDecoration: "none"
         })
     }
-    when( source: string ) { return new RelationBuilder( this, source ) }
-    keyframes( frames: KeyframesObject ): string {
+    when = ( source: string ) => {
+        return new RelationBuilder( this, source )
+    }
+    keyframes = ( frames: KeyframesObject ): string => {
         const seed = stableStringify( frames )
         const hash = createHashName( seed )
         const name = `${ this.prefix }_${ hash }`
@@ -239,7 +241,7 @@ export class NextStyle {
         }
         return name
     }
-    fontFace( font: FontFaceObject ): void {
+    fontFace = ( font: FontFaceObject ): void => {
         const seed = stableStringify( font )
         const hash = createHashName( seed )
         const key = `@font-face:${ hash }`
@@ -252,13 +254,13 @@ export class NextStyle {
             this.rules.set( key, cssText )
         }
     }
-    toTextCss(): string | null {
+    toTextCss = (): string | null => {
         if ( this.rules.size === 0 ) return null
         let cssText = ""
         for ( const rule of this.rules.values() ) cssText += rule + "\n"
         return cssText
     }
-    StyleProvider(): DetailedReactHTMLElement< { children: string }, HTMLStyleElement > | null {
+    StyleProvider = (): DetailedReactHTMLElement< { children: string }, HTMLStyleElement > | null => {
         if ( this.rules.size === 0 ) return null
         let cssText = ""
         for ( const rule of this.rules.values() ) cssText += rule + "\n"
