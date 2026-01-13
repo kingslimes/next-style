@@ -1,6 +1,6 @@
 {
 	"name": "next-style",
-	"version": "1.1.7",
+	"version": "1.1.8",
 	"description": "Lightweight runtime CSS-in-JS engine with nested pseudo selectors, media queries, global styles, keyframes, and font-face support.",
 	"author": {
 		"name": "kingslimes",
