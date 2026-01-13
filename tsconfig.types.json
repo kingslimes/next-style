@@ -5,7 +5,9 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "outDir": "builder/dist",
-    "moduleResolution": "bundler"
+    "verbatimModuleSyntax": false,
+    "moduleResolution": "node",
+    "stripInternal": false
   },
   "include": ["src"]
 }
