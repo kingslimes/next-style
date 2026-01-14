@@ -26,7 +26,7 @@ import type { DetailedReactHTMLElement } from "react"
 export type NextStyleProperties = {
     [ K in keyof Properties< string | number > ]?: Properties< string | number >[K]
 } & {
-    [ customProperty: `--${string}` ]?: string | number
+    [ customProperty: `--${string}` ]: string | number
 } & {
     _hover?: NextStyleObject
     _focus?: NextStyleObject
